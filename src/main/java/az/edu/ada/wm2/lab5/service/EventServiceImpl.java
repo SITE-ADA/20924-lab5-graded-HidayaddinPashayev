@@ -62,7 +62,6 @@ public class EventServiceImpl implements EventService {
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
 
-        // Update only non-null fields
         if (partialEvent.getEventName() != null) {
             existingEvent.setEventName(partialEvent.getEventName());
         }
@@ -83,29 +82,78 @@ public class EventServiceImpl implements EventService {
     }
 
     // Custom methods
+
     @Override
     public List<Event> getEventsByTag(String tag) {
-        return List.of();
+        if (tag == null || tag.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tag must not be null or empty");
+        }
+
+        return eventRepository.findAll()
+                .stream()
+                .filter(event -> event.getTags() != null &&
+                        event.getTags().stream()
+                                .anyMatch(t -> t.equalsIgnoreCase(tag.trim())))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getUpcomingEvents() {
-        return List.of();
+        LocalDateTime now = LocalDateTime.now();
+
+        return eventRepository.findAll()
+                .stream()
+                .filter(event -> event.getEventDateTime() != null &&
+                        event.getEventDateTime().isAfter(now))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-       return List.of();
+        if (minPrice == null || maxPrice == null) {
+            throw new IllegalArgumentException("Price range cannot be null");
+        }
+
+        if (minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("Min price cannot be greater than max price");
+        }
+
+        return eventRepository.findAll()
+                .stream()
+                .filter(event -> event.getTicketPrice() != null &&
+                        event.getTicketPrice().compareTo(minPrice) >= 0 &&
+                        event.getTicketPrice().compareTo(maxPrice) <= 0)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getEventsByDateRange(LocalDateTime start, LocalDateTime end) {
-        return List.of();
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Date range cannot be null");
+        }
+
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+
+        return eventRepository.findAll()
+                .stream()
+                .filter(event -> event.getEventDateTime() != null &&
+                        (event.getEventDateTime().isEqual(start) || event.getEventDateTime().isAfter(start)) &&
+                        (event.getEventDateTime().isEqual(end) || event.getEventDateTime().isBefore(end)))
+                .collect(Collectors.toList());
     }
 
     @Override
     public Event updateEventPrice(UUID id, BigDecimal newPrice) {
-        return null;
-    }
+        if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Price must be non-negative");
+        }
 
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+
+        event.setTicketPrice(newPrice);
+        return eventRepository.save(event);
+    }
 }
