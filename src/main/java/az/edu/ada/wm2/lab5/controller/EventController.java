@@ -95,5 +95,26 @@ public class EventController {
         );
     }
 
+    @GetMapping("/filter/price")
+    public ResponseEntity<List<Event>> filterByPrice(
+            @RequestParam BigDecimal min,
+            @RequestParam BigDecimal max) {
+
+        return new ResponseEntity<>(
+                eventService.getEventsByPriceRange(min, max),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/filter/tag")
+    public ResponseEntity<List<Event>> filterByTag(
+            @RequestParam String tag) {
+
+        return new ResponseEntity<>(
+                eventService.getEventsByTag(tag),
+                HttpStatus.OK
+        );
+    }
+
 
 }
