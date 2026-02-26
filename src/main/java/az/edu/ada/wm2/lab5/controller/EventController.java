@@ -124,6 +124,18 @@ public class EventController {
         );
     }
 
+    @PatchMapping("/{id}/price")
+    public ResponseEntity<Event> updatePrice(
+            @PathVariable UUID id,
+            @RequestParam BigDecimal price) {
 
-
+        try {
+            return new ResponseEntity<>(
+                    eventService.updateEventPrice(id, price),
+                    HttpStatus.OK
+            );
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
