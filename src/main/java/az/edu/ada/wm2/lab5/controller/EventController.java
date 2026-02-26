@@ -59,5 +59,15 @@ public class EventController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Event> updateEvent(@PathVariable UUID id,
+                                             @RequestBody Event event) {
+        try {
+            return new ResponseEntity<>(eventService.updateEvent(id, event), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }
