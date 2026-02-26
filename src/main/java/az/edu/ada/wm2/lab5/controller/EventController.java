@@ -116,5 +116,14 @@ public class EventController {
         );
     }
 
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<Event>> getUpcomingEvents() {
+        return new ResponseEntity<>(
+                eventService.getUpcomingEvents(),
+                HttpStatus.OK
+        );
+    }
+
+
 
 }
