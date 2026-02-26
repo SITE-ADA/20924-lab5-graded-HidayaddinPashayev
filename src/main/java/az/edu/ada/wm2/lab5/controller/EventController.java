@@ -69,5 +69,30 @@ public class EventController {
         }
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Event> partialUpdateEvent(@PathVariable UUID id,
+                                                    @RequestBody Event partialEvent) {
+        try {
+            return new ResponseEntity<>(eventService.partialUpdateEvent(id, partialEvent), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/filter/date")
+    public ResponseEntity<List<Event>> filterByDate(
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime start,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime end) {
+
+        return new ResponseEntity<>(
+                eventService.getEventsByDateRange(start, end),
+                HttpStatus.OK
+        );
+    }
 
 }
